@@ -23,7 +23,7 @@ module.exports = function(app, passport) {
 		failureRedirect : '/login', // redirect back to the signup page if there is an error
 		failureFlash : true // allow flash messages
 	}));
-	
+
 	// =====================================
 	// SIGNUP ==============================
 	// =====================================
@@ -45,7 +45,7 @@ module.exports = function(app, passport) {
 	// FACEBOOK ROUTES =====================
 	// =====================================
 	// route for facebook authentication and login
-	app.get('/auth/facebook', passport.authenticate('facebook', { scope : 'email' }));
+	app.get('/auth/facebook', passport.authenticate('facebook', { scope : 'email', 'read_insights' }));
 
 	// handle the callback after facebook has authenticated the user
 	app.get('/auth/facebook/callback',
