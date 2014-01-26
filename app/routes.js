@@ -69,8 +69,15 @@ module.exports = function(app, passport) {
 		facebook.getFbData(checkUser.facebook.token, "/"+fbUserId+'/accounts', function(data){ //get list of user pages
 		    var rawData = data;
 		    var newData = JSON.parse(rawData); //Parse JSON FB response to JS Object.
-		    console.log(newData.data[0].id);
-		    User.update({ 'facebook.id' : fbUserId }, {'facebook.page.id': newData.data[0].id, 'facebook.page.name': newData.data[0].name,'facebook.page.pageToken': newData.data[0].access_token}, function(err,affected) {
+		    var pages = new Array();
+		    for(var i=0;i<newData.data.length;i++){
+		    	pages.push({
+		    		'page.id': newData.data[i].id,
+		    		'page.name': newData.data[i].name,
+		    		'page.pageToken': newData.data[i].access_token
+		    	});
+		    }
+		    User.update({ 'facebook.id' : fbUserId }, {$push: { pages: {$each: pages}}}, function(err,affected) {
 			  console.log('affected rows %d', affected);
 			  		res.render('profile.ejs', { //Redirect after pages are retrieved
 						user : req.user // get the user out of session and pass to template

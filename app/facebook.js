@@ -23,6 +23,6 @@ exports.getFbData = function(accessToken, apiPath, callback) {
     request.on('error', function(e){
         console.log('error from facebook.getFbData: ' + e.message)
     });
-
+    
     request.end();
 }
