@@ -77,11 +77,14 @@ module.exports = function(app, passport) {
 		    		'page.pageToken': newData.data[i].access_token
 		    	});
 		    }
-		    User.update({ 'facebook.id' : fbUserId }, {$push: { pages: {$each: pages}}}, function(err,affected) {
-			  console.log('affected rows %d', affected);
-			  		res.render('profile.ejs', { //Redirect after pages are retrieved
-						user : req.user // get the user out of session and pass to template
-					});
+		    console.log("pages:" + pages);
+		    User.update({ 'facebook.id' : fbUserId }, {$push: { pages: {$each: pages}}}, function(err,affected, raw) {
+		    	if (err) return console.log("Error data input user:" + err);
+			  	console.log('affected rows %d', affected);
+  				console.log('The raw response from Mongo was ', raw);			  	
+		  		res.render('profile.ejs', { //Redirect after pages are retrieved
+					user : req.user // get the user out of session and pass to template
+				});
 			});
 		});
 	});
