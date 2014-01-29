@@ -6,7 +6,8 @@ var FacebookStrategy = require('passport-facebook').Strategy;
 
 // load up the user model
 var User       		= require('../app/models/user');
-
+// load up basic facebook lib
+var facebook            = require('../app/facebook');
 // load the auth variables
 var configAuth = require('./auth');
 
@@ -125,13 +126,12 @@ module.exports = function(passport) {
         process.nextTick(function() {
 
             // find the user in the database based on their facebook id
-            User.findOne({ 'facebook.id' : profile.id }, function(err, user) {
+            User.findOne({ 'userid' : profile.id }, function(err, user) {
 
                 // if there is an error, stop everything and return that
                 // ie an error connecting to the database
                 if (err)
                     return done(err);
-
                 // if the user is found, then log them in
                 if (user) {
                     return done(null, user); // user found, return that user
@@ -139,12 +139,12 @@ module.exports = function(passport) {
                     // if there is no user found with that facebook id, create them
                     var newUser            = new User();
                     // set all of the facebook information in our user model
-                    newUser.facebook.id    = profile.id; // set the users facebook id                   
-                    newUser.facebook.token = token; // we will save the token that facebook provides to the user                    
-                    newUser.facebook.name  = profile.name.givenName + ' ' + profile.name.familyName; // look at the passport user profile to see how names are returned
-                    newUser.facebook.email = profile.emails[0].value; // facebook can return multiple emails so we'll take the first
-                    console.log(token);
-                    // save our user to the database
+                    newUser.userid    = profile.id; // set the users facebook id                   
+                    newUser.token = token; // we will save the token that facebook provides to the user                    
+                    newUser.fname = profile.name.givenName;
+                    newUser.lname = profile.name.familyName;
+                    newUser.fullname  = profile.name.givenName + ' ' + profile.name.familyName; // look at the passport user profile to see how names are returned
+                    newUser.email = profile.emails[0].value; // facebook can return multiple emails so we'll take the first
                     newUser.save(function(err) {
                         if (err)
                             throw err;

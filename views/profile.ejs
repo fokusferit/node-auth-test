@@ -25,13 +25,20 @@
 				<h3 class="text-primary"><span class="fa fa-facebook"></span> Facebook</h3>
 
 					<p>
-						<strong>id</strong>: <%= user.facebook.id %><br>
-						<strong>token</strong>: <%= user.facebook.token %><br>
-						<strong>email</strong>: <%= user.facebook.email %><br>
-						<strong>name</strong>: <%= user.facebook.name %>
-						<strong>Page Name</strong>: <%= user.facebook.page.name %>
-						<strong>Page ID</strong>: <%= user.facebook.page.id %>
-						<strong>Page Token</strong>: <%= user.facebook.page.pageToken %>
+						<strong>id</strong>: <%= user.userid %><br>
+						<strong>token</strong>: <%= user.token %><br>
+						<strong>email</strong>: <%= user.email %><br>
+						<strong>name</strong>: <%= user.fullname %>
+						<p>===========================================</p>
+						<br/>
+						<ul>
+						<% for(var i=0;i<userPages.length;i++){%>
+							<li><strong>Nr:</strong>:<%= i+1 %></li>
+							<li><strong>Page-ID:</strong><%= userPages[i].pageid %></li>
+							<li><strong>Page-Name:</strong><%= userPages[i].name %></li>
+							<li><strong>Page-Token:</strong><%= userPages[i].access_token %><li>
+						<%}%>
+						</ul>
 					</p>
 
 			</div>

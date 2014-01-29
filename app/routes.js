@@ -1,6 +1,7 @@
 var facebook = require("./facebook.js");
 // load up the user model
 var User       		= require('../app/models/user');
+var Page       		= require('../app/models/page');
 // app/routes.js
 module.exports = function(app, passport) {
 
@@ -63,30 +64,41 @@ module.exports = function(app, passport) {
 	// we will want this protected so you have to be logged in to visit
 	// we will use route middleware to verify this (the isLoggedIn function)
 	app.get('/profile', isLoggedIn, function(req, res) {
-		var checkUser = req.user;
-		var fbUserId = checkUser.facebook.id;
-		console.log(checkUser + " , " + checkUser.facebook.token)
-		facebook.getFbData(checkUser.facebook.token, "/"+fbUserId+'/accounts', function(data){ //get list of user pages
-		    var rawData = data;
+		var userID = req.user.userid;
+		var userToken = req.user.token;
+		facebook.getFbData(userToken,"/"+userID+"/accounts",function(data){
+			var rawData = data;
 		    var newData = JSON.parse(rawData); //Parse JSON FB response to JS Object.
-		    var pages = new Array();
-		    for(var i=0;i<newData.data.length;i++){
-		    	pages.push({
-		    		'page.id': newData.data[i].id,
-		    		'page.name': newData.data[i].name,
-		    		'page.pageToken': newData.data[i].access_token
-		    	});
+		    for (var i = 0; i<newData.data.length; i++) {
+		    	var newPage = new Page();
+            	newPage.pageid = newData.data[i].id;
+            	newPage.userid = userID;
+            	newPage.name = newData.data[i].name;
+            	newPage.access_token = newData.data[i].access_token;
+				Page.update({ pageid: newPage.pageid},{pageid:newPage.pageid, userid: userID,name:newPage.name,access_token: newPage.access_token} ,{upsert:true} , function (err, numberAffected, raw) {
+				  if (err) return handleError(err);
+				  console.log('The number of updated documents was %d', numberAffected);
+				  console.log('The raw response from Mongo was ', raw);
+	            });
 		    }
-		    console.log("pages:" + pages);
-		    User.update({ 'facebook.id' : fbUserId }, {$push: { pages: {$each: pages}}}, function(err,affected, raw) {
-		    	if (err) return console.log("Error data input user:" + err);
-			  	console.log('affected rows %d', affected);
-  				console.log('The raw response from Mongo was ', raw);			  	
-		  		res.render('profile.ejs', { //Redirect after pages are retrieved
-					user : req.user // get the user out of session and pass to template
-				});
-			});
 		});
+		console.log(req.user);
+		var uApages = new Array();
+		uApages = Page.find({userid: userID}, function(err, pages){
+			if(err)
+				return err;
+			if(pages == 0){
+				return null;
+			}else{ //There is at least one page
+				console.log("pages"+ pages.length);
+			    res.render('profile.ejs', { //Redirect after pages are retrieved
+					user : req.user, // get the user out of session and pass to template
+					userPages: pages
+				});
+				return false;
+			}
+		})
+
 	});
 
 	// =====================================
